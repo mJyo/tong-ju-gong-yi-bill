@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>账本</title>
+  <title>桐菊账簿</title>
   <style>
     tr,
     th,
@@ -24,7 +24,9 @@
 
 <body>
   <main>
-    <h1>账本</h1>
+    <h1>桐菊账簿</h1>
+    <p><a href="https://github.com/bjwktcsnzh/tong-ju-gong-yi-bill" target="_blank">Github</a></p>
+    <p>推荐添加至浏览器的书签页。</p>
     <p>选择日期 :
       <select v-model="selectDate">
         <option v-for="item,key of datas" :value="key">{{key}}</option>
@@ -106,13 +108,24 @@
         }
       },
       mounted() {
-        let date = localStorage.getItem('selectDate')
-        if (date) {
-          this.selectDate = date
-        } else {
+        let { datas } = this;
+        (() => {
+          let date;
+          const urlParams = new URLSearchParams(window.location.search);
+          date = urlParams.get('date')
+          console.log('date', datas['on' + date])
+          if (date && datas['on' + date]) {
+            this.selectDate = 'on' + date
+            return
+          }
+          date = localStorage.getItem('selectDate')
+          if (date) {
+            this.selectDate = date
+            return
+          }
           let dates = Object.keys(this.datas)
           this.selectDate = dates[dates.length - 1]
-        }
+        })()
       },
       computed: {
         d() {

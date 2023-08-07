@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>账本</title>
+  <style>
+    tr,
+    th,
+    td {
+      padding: 5px;
+    }
+
+    #tables {
+      display: inline;
+    }
+
+    table {
+      display: unset;
+    }
+  </style>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+
+<body>
+  <main>
+    <h1>账本</h1>
+    <p>选择日期 :
+      <select v-model="selectDate">
+        <option v-for="item,key of datas" :value="key">{{key}}</option>
+      </select>
+    </p>
+    <div id="tables" v-if="selectDate">
+      <table>
+        <h2>购买物品信息</h2>
+        <tr>
+          <th>付款人</th>
+          <th>东西</th>
+          <th>金额（平均的）</th>
+          <th>被私分的</th>
+        </tr>
+        <tr v-for="({人,啥,元,贪,未完待续}) in buys">
+          <td>{{人}}</td>
+          <td :style="{'color':未完待续?'#3595b5':null}">{{啥}}</td>
+          <td>{{元.toFixed(2)}}</td>
+          <td>{{贪?贪.toFixed(2):''}}</td>
+        </tr>
+        <p>
+          <span>工益开支 : </span>
+          <span style="color:orange;font-weight: bold;">{{ sum.toFixed(2) }}</span>
+          &nbsp;
+          <span>总花费 : </span>
+          <span style="color:gainsboro;font-weight: bold;">{{ sum支出.toFixed(2) }}</span>
+          &nbsp;
+          <span>私分的金额 : </span>
+          <span style="color:gainsboro;font-weight: bold;">{{ sum私分.toFixed(2) }}</span>
+        </p>
+      </table>
+
+      <table>
+        <h2>参加人员平摊费用</h2>
+        <p>
+          <span>总人数 : </span>
+          <span style="color:green;font-weight: bold;">{{ 参加者.length }}</span>
+          &nbsp;
+          <span>平摊除数 : </span>
+          <span>{{ 平摊除数 }}</span>
+        </p>
+        <tr>
+          <th>组员</th>
+          <th>是否是学生</th>
+          <th>交钱</th>
+          <th>分摊数额</th>
+          <th>购置支出</th>
+        </tr>
+        <tr v-for="({人,学生,交钱,分摊数额,人没来,购置支出}) in 所有人">
+          <td style="font-weight: bold;" :style="{color:人没来?'gainsboro':'green'}">{{人}}</td>
+          <td>{{人没来?'':学生?'是':'否'}}</td>
+          <td style="font-weight: bold;" :style="{color:0 &gt;= 交钱?'pink':'green'}">
+            {{0 &gt;= 交钱 ? ('应得 '+ (-交钱.toFixed(2))) :('要交 ' + 交钱.toFixed(2))}} </td>
+          <td style="color: gainsboro;font-weight: bold;">{{分摊数额.toFixed(2)}}</td>
+          <td style="color: gainsboro;font-weight: bold;">{{购置支出.toFixed(2)}}</td>
+        </tr>
+      </table>
+
+    </div>
+  </main>
+  <script type="module">
+    import on20230730 from './20230730.js'
+    import on20230806 from './20230806.js'
+    const { createApp } = Vue
+
+    createApp({
+      data() {
+        return {
+          datas: { on20230730, on20230806 },
+          selectDate: null,
+        }
+      },
+      watch: {
+        selectDate: {
+          handler(n) {
+            localStorage.setItem('selectDate', n)
+          },
+          deep: true
+        }
+      },
+      mounted() {
+        let date = localStorage.getItem('selectDate')
+        if (date) {
+          this.selectDate = date
+        } else {
+          let dates = Object.keys(this.datas)
+          this.selectDate = dates[dates.length - 1]
+        }
+      },
+      computed: {
+        d() {
+          let { datas, selectDate } = this
+          return datas[selectDate]
+        },
+        buys() {
+          let { d } = this
+          let { 买 } = d
+          let buys = []
+          买.forEach(({ 人, 东西 }) => {
+            东西.forEach(({ 啥, 元, 贪, 未完待续 }) => {
+              buys.push({
+                人,
+                啥,
+                元,
+                贪: 贪 ? 贪 : 0,
+                未完待续
+              })
+            })
+          })
+          return buys
+        },
+        sum() {
+          let { sum支出, sum私分 } = this
+          return sum支出 - sum私分
+        },
+        sum支出() {
+          let { buys } = this
+          return buys.map(({ 元 }) => 元).reduce((s, cur, idx, arr) => s + cur)
+        },
+        sum私分() {
+          let { buys } = this
+          return buys.map(({ 贪 }) => 贪 ? 贪 : 0).reduce((s, cur, idx, arr) => s + cur)
+        },
+        平摊除数() {
+          let { d } = this
+          let { 做 } = d
+          let r = 0
+          做.forEach(({ 学生 }) => {
+            r += 学生 ? 0.5 : 1
+          })
+          return r
+        },
+        参加者() {
+          let { d, 平摊除数, sum } = this
+          let { 做 } = d
+          let r = []
+          做.forEach(({ 人, 学生 }) => {
+            let 分摊数额 = sum / 平摊除数 * (学生 ? 0.5 : 1);
+            r.push({ 人, 学生, 分摊数额 })
+          })
+          return r
+        },
+        所有人() {
+          let { 参加者, buys, d } = this
+          let { 买 } = d
+          let 参加者人名 = 参加者.map(({ 人 }) => 人)
+          return [
+            ...参加者,
+            ...(
+              买.map(({ 人 }) => {
+                return {
+                  人,
+                  人没来: true,
+                  分摊数额: 0
+                }
+              }).filter(({ 人 }) => !参加者人名.includes(人))
+            )
+          ].map(item => {
+            let itemOf买 = 买.find((it) => it.人 == item.人)
+            if (!itemOf买) {
+              return { ...item, 购置支出: 0, 交钱: item.分摊数额 }
+            } else {
+              let { 东西 } = itemOf买
+              let 购置支出
+              if (!东西 || 东西.length == 0) {
+                购置支出 = 0
+              } else {
+                购置支出 = 东西.map(({ 元 }) => 元).reduce((s, cur) => s + cur)
+              }
+
+              购置支出 = 购置支出 ? 购置支出 : 0
+              let 交钱 = item.分摊数额 - 购置支出
+              return { ...item, 购置支出, 交钱 }
+            }
+          })
+        }
+      },
+      methods: {
+
+      }
+    }).mount('main')
+  </script>
+</body>
+
+</html>

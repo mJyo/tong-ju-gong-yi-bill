@@ -106,7 +106,7 @@
       {{showStatistics?'隐藏统计信息':'展示统计信息'}}
     </button>
     <div v-if="showStatistics" id="statistics" style="margin-bottom: 100px;">
-      <table >
+      <table>
         <h3>未用完的物品</h3>
         <tr>
           <th style="min-width: 100px">东西</th>
@@ -214,12 +214,13 @@
           let { 买 } = d
           let buys = []
           买.forEach(({ 人, 东西 }) => {
-            东西.forEach(({ 啥, 元, 贪, 未完待续, 使用情况 }) => {
+            东西.forEach(({ 啥, 元, 贪, 总价, 未完待续, 使用情况 }) => {
               buys.push({
                 人,
                 啥,
                 使用情况,
                 元,
+                总价,
                 贪: 贪 ? 贪 : 0,
                 未完待续
               })

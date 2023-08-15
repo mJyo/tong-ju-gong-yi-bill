@@ -57,50 +57,55 @@
           <th>优惠</th>
           <th>交钱</th>
           <th>分摊数额</th>
-          <th>购置支出</th>
+          <th>其所购消耗</th>
         </tr>
-        <tr v-for="({人,学生,失业,交钱,分摊数额,人没来,购置支出}) in 所有人">
+        <tr v-for="({人,学生,失业,交钱,分摊数额,人没来,其所购消耗}) in 所有人">
           <td style="font-weight: bold;" :style="{color:人没来?'gainsboro':'green'}">{{人}}</td>
           <td>{{人没来?'':(学生?'学生':失业?'失业':'')}}</td>
           <td style="font-weight: bold;" :style="{color:0 &gt;= 交钱?'pink':'green'}">
             {{0 &gt;= 交钱 ? ('应得 '+ (-交钱.toFixed(2))) :('要交 ' + 交钱.toFixed(2))}} </td>
           <td style="color: gainsboro;font-weight: bold;">{{分摊数额.toFixed(2)}}</td>
-          <td style="color: gainsboro;font-weight: bold;">{{购置支出.toFixed(2)}}</td>
+          <td style="color: gainsboro;font-weight: bold;">{{其所购消耗.toFixed(2)}}</td>
         </tr>
       </table>
 
       <table>
         <h2>购买物品信息</h2>
+        <p>
+          <span>分摊总额 : </span>
+          <span style="color:orange;font-weight: bold;">{{ 分摊总额.toFixed(2) }}</span>
+          &nbsp;
+          <span>总消耗 : </span>
+          <span style="color:#dcdcdc;font-weight: bold;">{{ 总消耗.toFixed(2) }}</span>
+        </p>
         <tr>
           <th style="min-width: 50px">付款人</th>
           <th style="min-width: 50px">东西</th>
           <th style="min-width: 50px">使用情况</th>
-          <th>分摊数额</th>
+          <th>分摊</th>
+          <th>消耗</th>
+          <th>私分</th>
           <th>总价</th>
-          <th>被私分的</th>
         </tr>
-        <tr v-for="({人,啥,元,贪,未完待续,使用情况,总价}) in buys">
+        <tr v-for="({人,啥,分摊,消耗,私分,未完待续,使用情况,总价}) in buys">
           <td>{{人}}</td>
           <td :style="{'color':未完待续?'#3595b5':null}">{{啥}}</td>
           <td>{{使用情况}}</td>
-          <td style="color:green">{{元.toFixed(2)}}</td>
-          <td>{{typeof 总价==='number'?总价.toFixed(2):总价}}</td>
-          <td>{{贪?贪.toFixed(2):''}}</td>
+          <td style="color:green">{{分摊.toFixed(2)}}</td>
+          <td :style="{'color':消耗==分摊?'gainsboro':null}">{{消耗.toFixed(2)}}</td>
+          <td :style="{'color':私分==0?'gainsboro':null}">{{私分.toFixed(2)}}</td>
+          <td :style="{'color':总价==0?'gainsboro':null}">
+            {{typeof 总价==='number'?总价.toFixed(2):总价}}
+          </td>
         </tr>
-        <p>
-          <span>工益开支 : </span>
-          <span style="color:orange;font-weight: bold;">{{ sum.toFixed(2) }}</span>
-          &nbsp;
-          <span>总花费 : </span>
-          <span style="color:gainsboro;font-weight: bold;">{{ sum支出.toFixed(2) }}</span>
-        </p>
       </table>
       <div style="margin-top: 50px">
         <p>
           <span>私分的金额 : </span>
-          <span style="font-weight: bold;">{{ sum私分.toFixed(2) }}</span>
+          <span style="font-weight: bold;">{{ 总私分.toFixed(2) }}</span>
         </p>
         <p>私分的部分，由受益人发给付款人钱。（一般来说，是合租的人均摊发给财务，财务发给付款人钱）</p>
+        <p>分摊数额中不包括了私分部分的钱。</p>
       </div>
     </div>
     <hr style="margin: 60px 0px 20px 0px;" />
@@ -115,17 +120,21 @@
         <tr>
           <th style="min-width: 100px">东西</th>
           <th>总价</th>
-          <th>所使用的价格比例</th>
+          <th>分摊</th>
+          <th>消耗</th>
+          <th>私分</th>
           <th style="min-width: 50px">付款人</th>
           <th style="min-width: 200px">使用情况</th>
           <th>日期</th>
           <th>此次使用占比</th>
           <th>总计占比</th>
         </tr>
-        <tr v-for="({啥,总价, 元, 人, 未完待续, 使用情况,time,已用完,总计占比}) in 未用完的物品" :style="{'color':已用完?'gainsboro':null}">
+        <tr v-for="({啥,总价, 分摊, 消耗, 私分,人, 未完待续, 使用情况,date,已用完,总计占比}) in 未用完的物品" :style="{'color':已用完?'gainsboro':null}">
           <td>{{啥}}</td>
           <td>{{总价.toFixed(2)}}</td>
-          <td>{{元.toFixed(2)}}</td>
+          <td>{{分摊.toFixed(2)}}</td>
+          <td>{{消耗.toFixed(2)}}</td>
+          <td>{{私分.toFixed(2)}}</td>
           <td>{{人}}</td>
           <td>
             <span :style="{'font-weight':未完待续=='已用完'?'bold':'normal'}">
@@ -133,14 +142,15 @@
             </span>
             <span>{{使用情况}}</span>
           </td>
-          <td>{{time}}</td>
-          <td>{{((元/总价).toFixed(2)*100)+"%"}}</td>
+          <td>{{date}}</td>
+          <td>{{((分摊/总价).toFixed(2)*100)+"%"}}</td>
           <td>{{总计占比}}</td>
         </tr>
       </table>
     </div>
   </main>
   <script type="module">
+    // import testdata from './testdata.js'
     import on20230723 from './20230723.js'
     import on20230730 from './20230730.js'
     import on20230806 from './20230806.js'
@@ -151,6 +161,7 @@
       data() {
         return {
           datas: {
+            // testdata,
             on20230723,
             on20230730,
             on20230806,
@@ -170,7 +181,6 @@
                 let { protocol, host, pathname } = window.location
                 return `${protocol}//${host}${pathname}`
               })()
-              console.log("aa")
               window.history.pushState({ path: newurl }, '', newurl);
             }
           },
@@ -201,6 +211,66 @@
         })();
         (() => {
           this.showStatistics = localStorage.getItem('showStatistics') == "true"
+        })();
+        // define properties for 东西
+        (function () {
+          for (let date in datas) {
+            let { 买 } = datas[date]
+            for (let buy of 买) {
+              let { 人, 东西 } = buy
+              东西.forEach((it) => {
+                let { 啥, 总价, 消耗, 分摊, 私分, 未完待续, 使用情况 } = it
+                function isNull(o) {
+                  return o == null || o == undefined
+                }
+                function err(msg) {
+                  throw Error(msg + ": " + JSON.stringify({ it, 买, date }))
+                }
+
+                if (!isNull(消耗) && !isNull(分摊) && !isNull(私分) && 消耗 != 分摊 + 私分) {
+                  err("消耗需要等于分摊+私分。然而对不上")
+                } if (isNull(消耗) && isNull(分摊)) {
+                  err("消耗 和 分摊 至少要填一个")
+                }
+                Object.defineProperty(it, 'date', {
+                  get() {
+                    return date
+                  }
+                })
+                Object.defineProperty(it, '人', {
+                  get() {
+                    return 人
+                  }
+                })
+                Object.defineProperty(it, '总价', {
+                  get() {
+                    return 总价 ? 总价 : 0
+                  }
+                })
+                Object.defineProperty(it, '私分', {
+                  get() {
+                    if (私分) {
+                      return 私分
+                    }
+                    if (!isNull(消耗) && !isNull(分摊)) {
+                      return 消耗 - 分摊
+                    }
+                    return 0
+                  }
+                })
+                Object.defineProperty(it, '分摊', {
+                  get() {
+                    return !isNull(分摊) ? 分摊 : (消耗 - it.私分)
+                  }
+                })
+                Object.defineProperty(it, '消耗', {
+                  get() {
+                    return !isNull(消耗) ? 消耗 : (分摊 + it.私分)
+                  }
+                })
+              })
+            }
+          }
         })()
       },
       computed: {
@@ -214,35 +284,19 @@
           return datas[selectDate]
         },
         buys() {
-          let { d } = this
-          let { 买 } = d
-          let buys = []
-          买.forEach(({ 人, 东西 }) => {
-            东西.forEach(({ 啥, 元, 贪, 总价, 未完待续, 使用情况 }) => {
-              buys.push({
-                人,
-                啥,
-                使用情况,
-                元,
-                总价,
-                贪: 贪 ? 贪 : 0,
-                未完待续
-              })
-            })
-          })
-          return buys
+          return this.d.买.flatMap(it => it.东西)
         },
-        sum() {
-          let { sum支出, sum私分 } = this
-          return sum支出 - sum私分
+        分摊总额() {
+          let { 总消耗, 总私分 } = this
+          return 总消耗 - 总私分
         },
-        sum支出() {
+        总消耗() {
           let { buys } = this
-          return buys.map(({ 元 }) => 元).reduce((s, cur, idx, arr) => s + cur)
+          return buys.map(({ 消耗 }) => 消耗).reduce((s, cur, idx, arr) => s + cur)
         },
-        sum私分() {
+        总私分() {
           let { buys } = this
-          return buys.map(({ 贪 }) => 贪 ? 贪 : 0).reduce((s, cur, idx, arr) => s + cur)
+          return buys.map(({ 私分 }) => 私分).reduce((s, cur, idx, arr) => s + cur)
         },
         平摊除数() {
           let { d, 分摊份额 } = this
@@ -254,11 +308,11 @@
           return r
         },
         参加者() {
-          let { d, 平摊除数, 分摊份额, sum } = this
+          let { d, 平摊除数, 分摊份额, 分摊总额 } = this
           let { 做 } = d
           let r = []
           做.forEach(({ 人, 学生, 失业 }) => {
-            let 分摊数额 = sum / 平摊除数 * 分摊份额({ 学生, 失业 });
+            let 分摊数额 = 分摊总额 / 平摊除数 * 分摊份额({ 学生, 失业 });
             r.push({ 人, 学生, 失业, 分摊数额 })
           })
           return r
@@ -281,37 +335,25 @@
           ].map(item => {
             let itemOf买 = 买.find((it) => it.人 == item.人)
             if (!itemOf买) {
-              return { ...item, 购置支出: 0, 交钱: item.分摊数额 }
+              return { ...item, 其所购消耗: 0, 交钱: item.分摊数额 }
             } else {
               let { 东西 } = itemOf买
-              let 购置支出
+              let 其所购消耗
               if (!东西 || 东西.length == 0) {
-                购置支出 = 0
+                其所购消耗 = 0
               } else {
-                购置支出 = 东西.map(({ 元 }) => 元).reduce((s, cur) => s + cur)
+                其所购消耗 = 东西.map(({ 消耗 }) => 消耗).reduce((s, cur) => s + cur)
               }
 
-              购置支出 = 购置支出 ? 购置支出 : 0
-              let 交钱 = item.分摊数额 - 购置支出
-              return { ...item, 购置支出, 交钱 }
+              其所购消耗 = 其所购消耗 ? 其所购消耗 : 0
+              let 交钱 = item.分摊数额 - 其所购消耗
+              return { ...item, 其所购消耗, 交钱 }
             }
           })
         },
         未用完的物品() {
-          let { datas } = this
-          let res = []
-          for (let time in datas) {
-            let { 买 } = datas[time]
-            for (let buy of 买) {
-              let { 人, 东西 } = buy
-              东西.forEach(({ 啥, 总价, 元, 未完待续, 使用情况 }) => {
-                if (未完待续 == null || 未完待续 == undefined) {
-                  return
-                }
-                res.push({ 啥, 总价, 元, 人, 未完待续, 使用情况, time })
-              })
-            }
-          }
+          let { datas, toNum } = this
+          let res = Object.values(datas).flatMap(it => it.买).flatMap(it => it.东西).filter(({ 未完待续 }) => 未完待续 != null && 未完待续 != undefined)
           for (let idx in res) {
             let item = res[idx]
             let { 啥, 总价, 人, 未完待续 } = item
@@ -325,10 +367,10 @@
               for (let i in prevs) {
                 let it = prevs[i]
                 it["已用完"] = true
-                公用花费总额 += it.元
+                公用花费总额 += it.分摊
               }
               item["已用完"] = true
-              公用花费总额 += item.元
+              公用花费总额 += item.分摊
               item["总计占比"] = ((公用花费总额 / 总价).toFixed(2) * 100) + `% =${公用花费总额}/${总价}`
             } else {
               throw Error("BUG! 未完待续 值无效!")
@@ -340,7 +382,7 @@
       methods: {
         分摊份额({ 学生, 失业 }) {
           return (学生 || 失业) ? 0.5 : 1
-        },
+        }
       }
     }).mount('main')
   </script>

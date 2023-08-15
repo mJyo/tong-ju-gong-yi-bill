@@ -78,7 +78,8 @@ createApp({
 
                         if (!isNull(消耗) && !isNull(分摊) && !isNull(私分) && 消耗 != 分摊 + 私分) {
                             err("消耗需要等于分摊+私分。然而对不上")
-                        } if (isNull(消耗) && isNull(分摊)) {
+                        }
+                        if (isNull(消耗) && isNull(分摊)) {
                             err("消耗 和 分摊 至少要填一个")
                         }
                         Object.defineProperty(it, 'date', {
@@ -167,7 +168,7 @@ createApp({
             return r
         },
         所有人() {
-            let { 参加者, buys, 此次 } = this
+            let { 参加者, 此次 } = this
             let { 买 } = 此次
             let 参加者人名 = 参加者.map(({ 人 }) => 人)
             return [
@@ -201,7 +202,7 @@ createApp({
             })
         },
         未用完的物品() {
-            let { datas, toNum } = this
+            let { datas } = this
             let res = Object.values(datas).flatMap(it => it.买).flatMap(it => it.东西).filter(({ 未完待续 }) => 未完待续 != null && 未完待续 != undefined)
             for (let idx in res) {
                 let item = res[idx]

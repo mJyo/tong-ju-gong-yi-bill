@@ -93,11 +93,15 @@
           &nbsp;
           <span>总花费 : </span>
           <span style="color:gainsboro;font-weight: bold;">{{ sum支出.toFixed(2) }}</span>
-          &nbsp;
-          <span>私分的金额 : </span>
-          <span style="color:gainsboro;font-weight: bold;">{{ sum私分.toFixed(2) }}</span>
         </p>
       </table>
+      <div style="margin-top: 50px">
+        <p>
+          <span>私分的金额 : </span>
+          <span style="font-weight: bold;">{{ sum私分.toFixed(2) }}</span>
+        </p>
+        <p>私分的部分，由受益人发给付款人钱。（一般来说，是合租的人均摊发给财务，财务发给付款人钱）</p>
+      </div>
     </div>
     <hr style="margin: 60px 0px 20px 0px;" />
     <button @click="showStatistics = !showStatistics"

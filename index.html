@@ -47,7 +47,7 @@
         <h2>参加人员平摊费用</h2>
         <p>
           <span>总人数 : </span>
-          <span style="color:green;font-weight: bold;">{{ 参加者.length }}</span>
+          <span style="color:blueviolet;font-weight: bold;">{{ 参加者.length }}</span>
           &nbsp;
           <span>平摊除数 : </span>
           <span>{{ 平摊除数 }}</span>
@@ -56,13 +56,13 @@
           <th>组员</th>
           <th>优惠</th>
           <th>交钱</th>
-          <th>分摊数额</th>
-          <th>其所购消耗</th>
+          <th style="color: green">分摊数额</th>
+          <th style="color: cornflowerblue">其所购消耗</th>
         </tr>
         <tr v-for="({人,学生,失业,交钱,分摊数额,人没来,其所购消耗}) in 所有人">
-          <td style="font-weight: bold;" :style="{color:人没来?'gainsboro':'green'}">{{人}}</td>
+          <td style="font-weight: bold;" :style="{color:人没来?'gainsboro':'blueviolet'}">{{人}}</td>
           <td>{{人没来?'':(学生?'学生':失业?'失业':'')}}</td>
-          <td style="font-weight: bold;" :style="{color:0 &gt;= 交钱?'pink':'green'}">
+          <td style="font-weight: bold;" :style="{color:0 &gt;= 交钱?'pink':'blueviolet'}">
             {{0 &gt;= 交钱 ? ('应得 '+ (-交钱.toFixed(2))) :('要交 ' + 交钱.toFixed(2))}} </td>
           <td style="color: gainsboro;font-weight: bold;">{{分摊数额.toFixed(2)}}</td>
           <td style="color: gainsboro;font-weight: bold;">{{其所购消耗.toFixed(2)}}</td>
@@ -73,18 +73,18 @@
         <h2>购买物品信息</h2>
         <p>
           <span>分摊总额 : </span>
-          <span style="color:orange;font-weight: bold;">{{ 分摊总额.toFixed(2) }}</span>
+          <span style="color:green;font-weight: bold;">{{ 分摊总额.toFixed(2) }}</span>
           &nbsp;
           <span>总消耗 : </span>
-          <span style="color:#dcdcdc;font-weight: bold;">{{ 总消耗.toFixed(2) }}</span>
+          <span style="color:cornflowerblue;font-weight: bold;">{{ 总消耗.toFixed(2) }}</span>
         </p>
         <tr>
           <th style="min-width: 50px">付款人</th>
           <th style="min-width: 50px">东西</th>
           <th style="min-width: 50px">使用情况</th>
-          <th>分摊</th>
-          <th>消耗</th>
-          <th>私分</th>
+          <th style="color: green">分摊</th>
+          <th style="color: cornflowerblue">消耗</th>
+          <th style="color: chocolate">私分</th>
           <th>总价</th>
         </tr>
         <tr v-for="({人,啥,分摊,消耗,私分,未完待续,使用情况,总价}) in buys">
@@ -92,8 +92,8 @@
           <td :style="{'color':未完待续?'#3595b5':null}">{{啥}}</td>
           <td>{{使用情况}}</td>
           <td style="color:green">{{分摊.toFixed(2)}}</td>
-          <td :style="{'color':消耗==分摊?'gainsboro':null}">{{消耗.toFixed(2)}}</td>
-          <td :style="{'color':私分==0?'gainsboro':null}">{{私分.toFixed(2)}}</td>
+          <td :style="{'color':消耗==分摊?'gainsboro':'cornflowerblue'}">{{消耗.toFixed(2)}}</td>
+          <td :style="{'color':私分==0?'gainsboro':'chocolate'}">{{私分.toFixed(2)}}</td>
           <td :style="{'color':总价==0?'gainsboro':null}">
             {{typeof 总价==='number'?总价.toFixed(2):总价}}
           </td>
@@ -102,10 +102,10 @@
       <div style="margin-top: 50px">
         <p>
           <span>私分的金额 : </span>
-          <span style="font-weight: bold;">{{ 总私分.toFixed(2) }}</span>
+          <span style="font-weight: bold;color: chocolate;">{{ 总私分.toFixed(2) }}</span>
         </p>
-        <p>私分的部分，由受益人发给付款人钱。（一般来说，是合租的人均摊发给财务，财务发给付款人钱）</p>
-        <p>分摊数额中不包括了私分部分的钱。</p>
+        <p>私分的部分，在“参加人员平摊费用”的“其所购消耗”中已经被包括。</p>
+        <p>“分摊数额”中不包括了私分部分的钱。</p>
       </div>
     </div>
     <hr style="margin: 60px 0px 20px 0px;" />
@@ -120,11 +120,11 @@
         <tr>
           <th style="min-width: 100px">东西</th>
           <th>总价</th>
-          <th>分摊</th>
-          <th>消耗</th>
-          <th>私分</th>
           <th style="min-width: 50px">付款人</th>
           <th style="min-width: 200px">使用情况</th>
+          <th style="color: green">分摊</th>
+          <th style="color: cornflowerblue">消耗</th>
+          <th style="color: chocolate">私分</th>
           <th>日期</th>
           <th>此次使用占比</th>
           <th>总计占比</th>
@@ -132,9 +132,6 @@
         <tr v-for="({啥,总价, 分摊, 消耗, 私分,人, 未完待续, 使用情况,date,已用完,总计占比}) in 未用完的物品" :style="{'color':已用完?'gainsboro':null}">
           <td>{{啥}}</td>
           <td>{{总价.toFixed(2)}}</td>
-          <td>{{分摊.toFixed(2)}}</td>
-          <td>{{消耗.toFixed(2)}}</td>
-          <td>{{私分.toFixed(2)}}</td>
           <td>{{人}}</td>
           <td>
             <span :style="{'font-weight':未完待续=='已用完'?'bold':'normal'}">
@@ -142,6 +139,9 @@
             </span>
             <span>{{使用情况}}</span>
           </td>
+          <td style="color:green">{{分摊.toFixed(2)}}</td>
+          <td :style="{'color':消耗==分摊?'gainsboro':'cornflowerblue'}">{{消耗.toFixed(2)}}</td>
+          <td :style="{'color':私分==0?'gainsboro':'chocolate'}">{{私分.toFixed(2)}}</td>
           <td>{{date}}</td>
           <td>{{((分摊/总价).toFixed(2)*100)+"%"}}</td>
           <td>{{总计占比}}</td>

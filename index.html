@@ -3,7 +3,7 @@
 
 <head>
   <meta http-equiv="content-Type" content="text/html;charset=utf-8">
-  <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+  <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=yes" name="viewport">
   <title>桐菊账簿</title>
   <style>
     tr,
@@ -20,7 +20,7 @@
       display: unset;
     }
 
-    body{
+    body {
       background-color: #ffffff
     }
   </style>
@@ -32,24 +32,59 @@
     <h1>桐菊账簿</h1>
     <p><a href="https://github.com/bjwktcsnzh/tong-ju-gong-yi-bill" target="_blank">Github</a></p>
     <p>推荐添加至浏览器的书签页。</p>
-    <p>选择日期 :
-      <select v-model="selectDate">
-        <option v-for="item,key of datas" :value="key">{{key}}</option>
+    <p>
+      选择日期 :
+      <select v-model="selectDate" style="height:50px;width:200px;text-align:center;font-size: 17px;">
+        <option v-for="k of Object.keys(datas).reverse()" :value="k">{{k}}</option>
       </select>
+    </p>
+    <p>
+      <span>分享链接:</span><br />
+      <a id="share_link" :href="link">{{link}}</a>
     </p>
     <div id="tables" v-if="selectDate">
       <table>
+        <h2>参加人员平摊费用</h2>
+        <p>
+          <span>总人数 : </span>
+          <span style="color:green;font-weight: bold;">{{ 参加者.length }}</span>
+          &nbsp;
+          <span>平摊除数 : </span>
+          <span>{{ 平摊除数 }}</span>
+        </p>
+        <tr>
+          <th>组员</th>
+          <th>优惠</th>
+          <th>交钱</th>
+          <th>分摊数额</th>
+          <th>购置支出</th>
+        </tr>
+        <tr v-for="({人,学生,失业,交钱,分摊数额,人没来,购置支出}) in 所有人">
+          <td style="font-weight: bold;" :style="{color:人没来?'gainsboro':'green'}">{{人}}</td>
+          <td>{{人没来?'':(学生?'学生':失业?'失业':'')}}</td>
+          <td style="font-weight: bold;" :style="{color:0 &gt;= 交钱?'pink':'green'}">
+            {{0 &gt;= 交钱 ? ('应得 '+ (-交钱.toFixed(2))) :('要交 ' + 交钱.toFixed(2))}} </td>
+          <td style="color: gainsboro;font-weight: bold;">{{分摊数额.toFixed(2)}}</td>
+          <td style="color: gainsboro;font-weight: bold;">{{购置支出.toFixed(2)}}</td>
+        </tr>
+      </table>
+
+      <table>
         <h2>购买物品信息</h2>
         <tr>
-          <th>付款人</th>
+          <th style="min-width: 50px">付款人</th>
           <th>东西</th>
-          <th>金额（平均的）</th>
+          <th>使用情况</th>
+          <th>分摊数额</th>
+          <th>总价</th>
           <th>被私分的</th>
         </tr>
-        <tr v-for="({人,啥,元,贪,未完待续}) in buys">
+        <tr v-for="({人,啥,元,贪,未完待续,使用情况,总价}) in buys">
           <td>{{人}}</td>
           <td :style="{'color':未完待续?'#3595b5':null}">{{啥}}</td>
-          <td>{{元.toFixed(2)}}</td>
+          <td>{{使用情况}}</td>
+          <td style="color:green">{{元.toFixed(2)}}</td>
+          <td>{{typeof 总价==='number'?总价.toFixed(2):总价}}</td>
           <td>{{贪?贪.toFixed(2):''}}</td>
         </tr>
         <p>
@@ -63,53 +98,83 @@
           <span style="color:gainsboro;font-weight: bold;">{{ sum私分.toFixed(2) }}</span>
         </p>
       </table>
-
-      <table>
-        <h2>参加人员平摊费用</h2>
-        <p>
-          <span>总人数 : </span>
-          <span style="color:green;font-weight: bold;">{{ 参加者.length }}</span>
-          &nbsp;
-          <span>平摊除数 : </span>
-          <span>{{ 平摊除数 }}</span>
-        </p>
+    </div>
+    <hr style="margin: 60px 0px 20px 0px;" />
+    <button @click="showStatistics = !showStatistics"
+      style="font-size:17px;text-align: center;height: 40px;width:140px;"
+      :style="{'margin-bottom':showStatistics?'0px':'40px'}">
+      {{showStatistics?'隐藏统计信息':'展示统计信息'}}
+    </button>
+    <div v-if="showStatistics" id="statistics" style="margin-bottom: 100px;">
+      <table >
+        <h3>未用完的物品</h3>
         <tr>
-          <th>组员</th>
-          <th>是否是学生</th>
-          <th>交钱</th>
-          <th>分摊数额</th>
-          <th>购置支出</th>
+          <th style="min-width: 100px">东西</th>
+          <th>总价</th>
+          <th>所使用的价格比例</th>
+          <th style="min-width: 50px">付款人</th>
+          <th style="min-width: 200px">使用情况</th>
+          <th>日期</th>
+          <th>此次使用占比</th>
+          <th>总计占比</th>
         </tr>
-        <tr v-for="({人,学生,交钱,分摊数额,人没来,购置支出}) in 所有人">
-          <td style="font-weight: bold;" :style="{color:人没来?'gainsboro':'green'}">{{人}}</td>
-          <td>{{人没来?'':学生?'是':'否'}}</td>
-          <td style="font-weight: bold;" :style="{color:0 &gt;= 交钱?'pink':'green'}">
-            {{0 &gt;= 交钱 ? ('应得 '+ (-交钱.toFixed(2))) :('要交 ' + 交钱.toFixed(2))}} </td>
-          <td style="color: gainsboro;font-weight: bold;">{{分摊数额.toFixed(2)}}</td>
-          <td style="color: gainsboro;font-weight: bold;">{{购置支出.toFixed(2)}}</td>
+        <tr v-for="({啥,总价, 元, 人, 未完待续, 使用情况,time,已用完,总计占比}) in 未用完的物品" :style="{'color':已用完?'gainsboro':null}">
+          <td>{{啥}}</td>
+          <td>{{总价.toFixed(2)}}</td>
+          <td>{{元.toFixed(2)}}</td>
+          <td>{{人}}</td>
+          <td>
+            <span :style="{'font-weight':未完待续=='已用完'?'bold':'normal'}">
+              {{未完待续=="已用完"?"（这次已用完）":""}}
+            </span>
+            <span>{{使用情况}}</span>
+          </td>
+          <td>{{time}}</td>
+          <td>{{((元/总价).toFixed(2)*100)+"%"}}</td>
+          <td>{{总计占比}}</td>
         </tr>
       </table>
-
     </div>
   </main>
   <script type="module">
+    import on20230723 from './20230723.js'
     import on20230730 from './20230730.js'
     import on20230806 from './20230806.js'
+    import on20230813 from './20230813.js'
     const { createApp } = Vue
 
     createApp({
       data() {
         return {
-          datas: { on20230730, on20230806 },
+          datas: {
+            on20230723,
+            on20230730,
+            on20230806,
+            on20230813
+          },
           selectDate: null,
+          showStatistics: false,
         }
       },
       watch: {
         selectDate: {
           handler(n) {
             localStorage.setItem('selectDate', n)
+            if (window.location.search != "") {
+              // see : https://stackoverflow.com/questions/10970078/modifying-a-query-string-without-reloading-the-page
+              let newurl = (function () {
+                let { protocol, host, pathname } = window.location
+                return `${protocol}//${host}${pathname}`
+              })()
+              console.log("aa")
+              window.history.pushState({ path: newurl }, '', newurl);
+            }
           },
-          deep: true
+        },
+        showStatistics: {
+          handler(n) {
+            localStorage.setItem('showStatistics', `${n}`)
+          },
         }
       },
       mounted() {
@@ -117,10 +182,9 @@
         (() => {
           let date;
           const urlParams = new URLSearchParams(window.location.search);
-          date = urlParams.get('date')
-          console.log('date', datas['on' + date])
-          if (date && datas['on' + date]) {
-            this.selectDate = 'on' + date
+          date = urlParams.get('selectDate')
+          if (date && datas[date]) {
+            this.selectDate = date
             return
           }
           date = localStorage.getItem('selectDate')
@@ -130,9 +194,17 @@
           }
           let dates = Object.keys(this.datas)
           this.selectDate = dates[dates.length - 1]
+        })();
+        (() => {
+          this.showStatistics = localStorage.getItem('showStatistics') == "true"
         })()
       },
       computed: {
+        link() {
+          let { selectDate } = this
+          let { protocol, host, pathname } = window.location
+          return `${protocol}//${host}${pathname}?selectDate=${selectDate}`
+        },
         d() {
           let { datas, selectDate } = this
           return datas[selectDate]
@@ -142,10 +214,11 @@
           let { 买 } = d
           let buys = []
           买.forEach(({ 人, 东西 }) => {
-            东西.forEach(({ 啥, 元, 贪, 未完待续 }) => {
+            东西.forEach(({ 啥, 元, 贪, 未完待续, 使用情况 }) => {
               buys.push({
                 人,
                 啥,
+                使用情况,
                 元,
                 贪: 贪 ? 贪 : 0,
                 未完待续
@@ -167,21 +240,21 @@
           return buys.map(({ 贪 }) => 贪 ? 贪 : 0).reduce((s, cur, idx, arr) => s + cur)
         },
         平摊除数() {
-          let { d } = this
+          let { d, 分摊份额 } = this
           let { 做 } = d
           let r = 0
-          做.forEach(({ 学生 }) => {
-            r += 学生 ? 0.5 : 1
+          做.forEach(it => {
+            r += 分摊份额(it)
           })
           return r
         },
         参加者() {
-          let { d, 平摊除数, sum } = this
+          let { d, 平摊除数, 分摊份额, sum } = this
           let { 做 } = d
           let r = []
-          做.forEach(({ 人, 学生 }) => {
-            let 分摊数额 = sum / 平摊除数 * (学生 ? 0.5 : 1);
-            r.push({ 人, 学生, 分摊数额 })
+          做.forEach(({ 人, 学生, 失业 }) => {
+            let 分摊数额 = sum / 平摊除数 * 分摊份额({ 学生, 失业 });
+            r.push({ 人, 学生, 失业, 分摊数额 })
           })
           return r
         },
@@ -218,10 +291,51 @@
               return { ...item, 购置支出, 交钱 }
             }
           })
+        },
+        未用完的物品() {
+          let { datas } = this
+          let res = []
+          for (let time in datas) {
+            let { 买 } = datas[time]
+            for (let buy of 买) {
+              let { 人, 东西 } = buy
+              东西.forEach(({ 啥, 总价, 元, 未完待续, 使用情况 }) => {
+                if (未完待续 == null || 未完待续 == undefined) {
+                  return
+                }
+                res.push({ 啥, 总价, 元, 人, 未完待续, 使用情况, time })
+              })
+            }
+          }
+          for (let idx in res) {
+            let item = res[idx]
+            let { 啥, 总价, 人, 未完待续 } = item
+            if (未完待续 == true) {
+              continue
+            } else if (未完待续 == '已用完') {
+              let 公用花费总额 = 0
+              let prevs = res.slice(0, idx).filter(it => {
+                return it.啥 == 啥 && it.总价 == 总价 && it.人 == 人
+              })
+              for (let i in prevs) {
+                let it = prevs[i]
+                it["已用完"] = true
+                公用花费总额 += it.元
+              }
+              item["已用完"] = true
+              公用花费总额 += item.元
+              item["总计占比"] = ((公用花费总额 / 总价).toFixed(2) * 100) + `% =${公用花费总额}/${总价}`
+            } else {
+              throw Error("BUG! 未完待续 值无效!")
+            }
+          }
+          return res.reverse()
         }
       },
       methods: {
-
+        分摊份额({ 学生, 失业 }) {
+          return (学生 || 失业) ? 0.5 : 1
+        },
       }
     }).mount('main')
   </script>
